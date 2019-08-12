@@ -1,3 +1,49 @@
+# Fork details
+
+Forked from [NVidia StyleGAN](https://github.com/NVlabs/stylegan)
+
+Modified to resume from latest checkpoint as per tutorial by [Gwern](https://www.gwern.net/Faces#running).
+
+Some additional helpers, then original StyleGAN readme below.
+
+### Image Conversion
+
+StyleGAN requires all images to be the same size and same height/width (e.g. 256x256 or 512x512) and same colorspace. To quickly convert all images in a folder:
+
+```
+cd IMAGES # change to your directory
+mkdir converted
+# find any images in this folder and convert to 256x256 sRGB jpeg into the "converted" folder
+find . -maxdepth 1 -type f -name "*.jpg" -exec convert {} -resize 256x256^ -gravity center -extent 256x256 -colorspace sRGB -type truecolor converted/{} ';'
+```
+Then run ```dataset_tool.py``` as per instructions below.
+
+### Training code
+
+This runs StyleGAN training in a loop, restarting when it crashes.
+```
+while true; do nice python train.py ; date; echo "!!!! StyleGAN crashed !!!!" &); sleep 10s; done
+```
+You can also log console output using:
+
+```
+while true; do nice python train.py | tee "log_$(date '+%Y%m%d-%H%M%S').txt"; ; date; echo "!!!! StyleGAN crashed !!!!" &); sleep 10s; done
+```
+
+### Making training video
+
+```
+cat $(ls results/*test-1*/fakes*.png | sort --numeric-sort) | ffmpeg -framerate 10 -i - -r 25 -c:v libx264 -pix_fmt yuv420p -crf 33 -vf "scale=iw/2:ih/2" -preset veryslow -tune animation ./stylegan-test-training.mp4
+```
+
+### Scripts for making videos
+
+Includes scripts for generating samples and interpolation videos.
+
+Requires [moviepy](https://zulko.github.io/moviepy/install.html)
+
+----------
+
 ## StyleGAN &mdash; Official TensorFlow Implementation
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
 ![TensorFlow 1.10](https://img.shields.io/badge/tensorflow-1.10-green.svg?style=plastic)
